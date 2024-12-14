@@ -146,7 +146,7 @@ class CronJob implements RequestHandlerInterface
         });
 
         if ($birthdayFacts->isNotEmpty()) {
-            $message .= "🎂 <b>". I18N::translate("Birthdays:") . "</b>\n\n";
+            $message .= "🎂 <b>". I18N::translate("Birthdays:") . "</b>\n";
 
             foreach ($birthdayFacts as $fact) {
                 $fullName = strip_tags($fact['fullName']);
@@ -167,7 +167,7 @@ class CronJob implements RequestHandlerInterface
         });
 
         if ($marriageFacts->isNotEmpty()) {
-            $message .= "\n💍 <b>". I18N::translate("Wedding days:") . "</b>\n\n";
+            $message .= "\n💍 <b>". I18N::translate("Wedding days:") . "</b>\n";
 
             foreach ($marriageFacts as $fact) {
                 $husband =  strip_tags($fact['husband']);
