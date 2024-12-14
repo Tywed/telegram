@@ -1,0 +1,99 @@
+<?php
+
+use Fisharebest\Webtrees\I18N;
+use Fisharebest\Webtrees\Http\RequestHandlers\ControlPanel;
+use Fisharebest\Webtrees\Http\RequestHandlers\ModulesAllPage;
+
+?>
+
+<?php echo view('components/breadcrumbs', ['links' => [route(ControlPanel::class) => I18N::translate('Control panel'), route(ModulesAllPage::class) => I18N::translate('Modules'), $title]]); ?>
+
+<h1><?php echo $title; ?></h1>
+
+<h5>
+    <?php echo I18N::translate('Settings for the module'); ?>
+</h5>
+
+<div>
+    <form method="post" class="row">
+        <div class="row mb-3">
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('API Token Telegram bot:'); ?>
+                </h6>
+                </p>
+                <div class="mb-3">
+                    <input type="text" id="telegram_token" class="form-control" name="telegram_token" dir="auto" autofocus value="<?php echo e($telegram_token); ?>">
+                    <div class="form-text" id="users-description">
+                        <?= I18N::translate('Obtain Your Bot Token using') ?> <a href="https://core.telegram.org/bots/tutorial#obtain-your-bot-token"> BotFather.</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('Telegram ID:'); ?>
+                </h6>
+                </p>
+                <div class="mb-3">
+                    <input type="text" id="telegram_id" class="form-control" name="telegram_id" dir="auto" autofocus value="<?php echo e($telegram_id); ?>">
+                    <div class="form-text" id="users-description">
+                        <?= I18N::translate('You can specify the ID of a telegram user, channel, or group.') ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('User') . ':'; ?>
+                </h6>
+                </p>
+                <div class="mb-3">
+                    <?= view('components/select', ['name' => 'users', 'selected' => $user, 'options' => $users]) ?>
+                    <div class="form-text" id="users-description">
+                        <?= I18N::translate('Select the user whose privacy and language settings will be used when creating event lists.') ?>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('Tree') . ':'; ?>
+                </h6>
+                </p>
+                <div class="mb-3">
+                    <?= view('components/select', ['name' => 'trees', 'selected' => $tree, 'options' => $trees]) ?>
+                    <div class="form-text" id="trees-description">
+                        <?= I18N::translate('Select a tree.') ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <p>
+            <h6>
+                <?php echo I18N::translate('URL') . ':'; ?>
+            </h6>
+            </p>
+            <span class="input-group-text" dir="ltr">
+                <?= "0 9 * * * wget -O - -q " . '"' . e(explode('{}', rawurldecode(route('telegram')))[0]) . '"' ?>
+            </span>
+            <div class="form-text">
+                <?= I18N::translate('Copy this link and put it into your cron on the server. The default setting is 9 hours of every day.') ?>
+            </div>
+        </div>
+</div>
+
+<button class="btn btn-primary" id="submit" style="width: 200px">
+    <?php echo view('icons/save'); ?>
+    <?php echo I18N::translate('save'); ?>
+</button>
+
+<?php echo csrf_field(); ?>
+</form>
+</div>
