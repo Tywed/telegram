@@ -7,7 +7,7 @@ return [
     'API Token Telegram bot:' => 'Token de API para el bot de Telegram:',
     "Today's events:" => "Eventos de hoy:",
     'Birthdays:' => 'Cumpleaños:',
-    'Wedding anniversaries:' => 'Aniversarios de bodas:',
+    'Wedding days:' => 'Aniversarios de bodas:',
     'Obtain Your Bot Token using' => 'Obtén tu token de bot a través de',
     'You can specify the ID of a telegram user, channel, or group.' => 'Puedes especificar la ID de un usuario, canal o grupo de Telegram.',
     'Select the user whose privacy and language settings will be used when creating event lists.' => 'Selecciona el usuario cuyas configuraciones de privacidad e idioma se usarán al crear listas de eventos.',
