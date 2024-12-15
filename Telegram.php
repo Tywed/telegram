@@ -38,6 +38,7 @@ use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Module\ModuleConfigTrait;
 use Fisharebest\Webtrees\FlashMessages;
+use Fisharebest\Webtrees\Module\OnThisDayModule;
 use Fisharebest\Webtrees\Services\UserService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Tywed\Webtrees\Module\Telegram\CronJob as TelegramCronJob;
@@ -51,7 +52,7 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
     public const CUSTOM_MODULE = 'Telegram';
     public const CUSTOM_AUTHOR = 'Tywed';
     public const CUSTOM_WEBSITE = 'https://github.com/tywed/' . self::CUSTOM_MODULE . '/';
-    public const CUSTOM_VERSION = '0.1.0';
+    public const CUSTOM_VERSION = '0.1.1';
     public const CUSTOM_LAST = self::CUSTOM_WEBSITE . 'raw/main/latest-version.txt';
     public const CUSTOM_SUPPORT_URL = self::CUSTOM_WEBSITE . 'issues';
     public const PREFIX = 'telegram';
@@ -150,6 +151,15 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
             $treeOptions[$tree->id()] = $tree->name();  
         }
 
+        $default_events = implode(',', CustomOnThisDayModule::getDefaultEvents());
+        $events     = $this->getPreference('events', $default_events);
+        $event_array = explode(',', $events);
+        $all_events = CustomOnThisDayModule::getEventLabels();
+
+        $filter     = $this->getPreference('filter', '1');
+        $start_message     = $this->getPreference('start_message', '');
+        $end_message     = $this->getPreference('end_message', '');
+
         return $this->viewResponse($this->name() . '::settings', [
             'title' => $this->title(),
             'telegram_token' => $this->getPreference('telegram_token', 'Not set'),
@@ -158,6 +168,11 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
             'users' => $userOptions,
             'tree' => $this->getPreference('tree', ''),
             'trees' => $treeOptions,
+            'event_array' => $event_array,
+            'all_events'  => $all_events,
+            'filter'      => $filter,
+            'start_message'      => base64_decode($start_message),
+            'end_message'      => base64_decode($end_message),
         ]);
     }
 
@@ -169,6 +184,10 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
         $this->setPreference('telegram_id', $params['telegram_id']);
         $this->setPreference('user', $params['users']);
         $this->setPreference('tree', $params['trees']);
+        $this->setPreference('events', implode(',', $params['events']));
+        $this->setPreference('filter', $params['filter']);
+        $this->setPreference('start_message', base64_encode($params['start_message']));
+        $this->setPreference('end_message', base64_encode($params['end_message']));
 
         $message = I18N::translate('The preferences for the module “%s” have been updated.', $this->title());
         FlashMessages::addMessage($message, 'success');

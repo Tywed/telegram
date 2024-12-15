@@ -51,18 +51,36 @@ class CronJob implements RequestHandlerInterface
                 'error' => 'Preferences not set',
             ]);
         }
-        
+
+        $startJd = Registry::timestampFactory()->now()->julianDay();
+        $endJd = $startJd;
+
+        $launch = $this->module->getPreference('launch');
+
+        if ($startJd == $launch) {
+            return response([
+                'success' => false,
+                'error' => 'The cron has already been launched today',
+            ]);
+        }
+
         $user = $this->users->find($user);
 
         Auth::login($user);
         I18N::init($user->getPreference(User::PREF_LANGUAGE, 'en'));
 
-        $startJd = Registry::timestampFactory()->now()->julianDay();
-        $endJd = Registry::timestampFactory()->now()->julianDay();
-        
         $tree = $this->trees->find($tree);
 
-        $factList =  $this->todayFacts(['BIRT', 'MARR'], $startJd, $endJd, $tree);
+        $filter    = (bool) $this->module->getPreference('filter', '1');
+        $default_events = implode(',', CustomOnThisDayModule::getDefaultEvents());
+        $events    = $this->module->getPreference('events', $default_events);
+        $event_array = explode(',', $events);
+
+        if ($filter) {
+            $event_array = array_diff($event_array, Gedcom::DEATH_EVENTS);
+        }
+
+        $factList =  $this->todayFacts($event_array, $startJd, $endJd, $tree, $filter);
 
         if ($factList->isNotEmpty()) {
             $message = $this->generateTelegramMessage($factList);
@@ -71,19 +89,21 @@ class CronJob implements RequestHandlerInterface
 
         Auth::logout();
 
+        $this->module->setPreference('launch', $startJd);
+
         return response([
             'success' => true,
         ]);
     }
 
-    private function todayFacts($types, $startJd, $endJd, $tree)
+    private function todayFacts($types, $startJd, $endJd, $tree, $filter)
     {
 
         $facts = $this->events->getEventsList(
             $startJd,
             $endJd,
             implode(',', $types),
-            true,
+            $filter,
             'alpha',
             $tree
         )->filter(static function (Fact $fact) {
@@ -103,7 +123,7 @@ class CronJob implements RequestHandlerInterface
                 if ($record instanceof Individual) {
                     $fullName = $record->fullName();
                     $birthDate = $fact->date();
-                    $personLink = $record->url(); 
+                    $personLink = $record->url();
 
                     return [
                         'type' => 'BIRTHDAY',
@@ -116,10 +136,10 @@ class CronJob implements RequestHandlerInterface
 
             if ($fact->tag() === 'FAM:MARR') {
                 if ($record instanceof Family) {
-                    $husband = $record->husband();  
-                    $wife = $record->wife();  
+                    $husband = $record->husband();
+                    $wife = $record->wife();
                     $marriageDate = $fact->date();
-                    $familyLink = $record->url(); 
+                    $familyLink = $record->url();
 
                     return [
                         'type' => 'MARRIAGE',
@@ -139,20 +159,22 @@ class CronJob implements RequestHandlerInterface
 
     private function generateTelegramMessage(Collection $factList): string
     {
-        $message = "🎉 <b>". I18N::translate("Today's events:") . "</b>\n\n";
+        $start_message = base64_decode($this->module->getPreference('start_message'));
+
+        $message = !empty($start_message) ? $start_message . "\n" : "🎉 <b>" . I18N::translate("Today's events:") . "</b>\n\n";
 
         $birthdayFacts = $factList->filter(function ($fact) {
             return $fact['type'] === 'BIRTHDAY';
         });
 
         if ($birthdayFacts->isNotEmpty()) {
-            $message .= "🎂 <b>". I18N::translate("Birthdays:") . "</b>\n\n";
+            $message .= "🎂 <b>" . I18N::translate("Birthdays:") . "</b>\n";
 
             foreach ($birthdayFacts as $fact) {
                 $fullName = strip_tags($fact['fullName']);
-                $profileLink = $fact['link']; 
+                $profileLink = $fact['link'];
                 $message .= "<a href=\"$profileLink\">$fullName</a>";
-                if (!empty($fact['birthDate'])){
+                if (!empty($fact['birthDate'])) {
                     $year = $fact['birthDate']->gregorianYear();
                     if ($year > 0) {
                         $age = $this->age($year);
@@ -167,16 +189,16 @@ class CronJob implements RequestHandlerInterface
         });
 
         if ($marriageFacts->isNotEmpty()) {
-            $message .= "\n💍 <b>". I18N::translate("Wedding days:") . "</b>\n\n";
+            $message .= "\n💍 <b>" . I18N::translate("Wedding days:") . "</b>\n";
 
             foreach ($marriageFacts as $fact) {
                 $husband =  strip_tags($fact['husband']);
                 $wife =  strip_tags($fact['wife']);
-                
+
                 $familyLink = $fact['link'];
 
                 $message .= "<a href=\"$familyLink\">$husband & $wife</a>";
-                if (!empty($fact['marriageDate'])){
+                if (!empty($fact['marriageDate'])) {
                     $year = $fact['marriageDate']->gregorianYear();
                     if ($year > 0) {
                         $age = $this->age($year);
@@ -186,10 +208,16 @@ class CronJob implements RequestHandlerInterface
             }
         }
 
+        $end_message = $this->module->getPreference('end_message');
+        if (!empty($end_message)) {
+            $message .= "\n" . base64_decode($end_message);
+        }
+
         return $message;
     }
 
-    private function age ($date) {
+    private function age($date)
+    {
         $currentYear = (new \DateTime())->format('Y');
         $age = $currentYear -  $date;
         return $age;

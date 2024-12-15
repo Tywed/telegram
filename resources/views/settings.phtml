@@ -25,7 +25,7 @@ use Fisharebest\Webtrees\Http\RequestHandlers\ModulesAllPage;
                 </p>
                 <div class="mb-3">
                     <input type="text" id="telegram_token" class="form-control" name="telegram_token" dir="auto" autofocus value="<?php echo e($telegram_token); ?>">
-                    <div class="form-text" id="users-description">
+                    <div class="form-text" id="telegram-token-description">
                         <?= I18N::translate('Obtain Your Bot Token using') ?> <a href="https://core.telegram.org/bots/tutorial#obtain-your-bot-token"> BotFather.</a>
                     </div>
                 </div>
@@ -38,7 +38,7 @@ use Fisharebest\Webtrees\Http\RequestHandlers\ModulesAllPage;
                 </p>
                 <div class="mb-3">
                     <input type="text" id="telegram_id" class="form-control" name="telegram_id" dir="auto" autofocus value="<?php echo e($telegram_id); ?>">
-                    <div class="form-text" id="users-description">
+                    <div class="form-text" id="telegram-id-description">
                         <?= I18N::translate('You can specify the ID of a telegram user, channel, or group.') ?>
                     </div>
                 </div>
@@ -75,6 +75,35 @@ use Fisharebest\Webtrees\Http\RequestHandlers\ModulesAllPage;
         </div>
 
         <div class="row mb-3">
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?= I18N::translate('Show only events of living individuals') . ':' ?>
+                </h6>
+                </p>
+                <fieldset class="row mb-3">
+                    <div class="col-sm-12">
+                    <?= view('components/radios-inline', ['name' => 'filter', 'options' => [I18N::translate('no'), I18N::translate('yes')], 'selected' => (int) $filter]) ?>
+                    
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?= I18N::translate('Events') . ':' ?>
+                </h6>
+                </p>
+                <div class="mb-3">
+                    <?= view('components/select', ['name' => 'events[]', 'id' => 'events', 'selected' => $event_array, 'options' => $all_events, 'class' => 'tom-select']) ?>
+                    <div class="form-text" id="event-description">
+                        <?= I18N::translate('Select the events to send messages.') ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
             <p>
             <h6>
                 <?php echo I18N::translate('URL') . ':'; ?>
@@ -87,12 +116,47 @@ use Fisharebest\Webtrees\Http\RequestHandlers\ModulesAllPage;
                 <?= I18N::translate('Copy this link and put it into your cron on the server. The default setting is 9 hours of every day.') ?>
             </div>
         </div>
-</div>
+        <div>
+            <h6 class="text-center">
+                <?php echo I18N::translate('Message settings') . ':'; ?>
+            </h6>
+        </div>
+        <div class="row mb-3">
+            <label for="start_message" class="col-sm-3 col-form-label">
+                <?= I18N::translate('Starting a custom message:') ?>
+            </label>
+            <div class="col-sm-9">
+                <textarea id="start_message" name="start_message" class="form-control font-monospace" dir="ltr" rows="4"><?= e($start_message) ?></textarea>
+                <p class="text-muted">
+                   <a href="https://core.telegram.org/bots/api#html-style"> <?= I18N::translate('Only use  tags that telegram supports') ?></a>
+                </p>
+            </div>
+        </div>
 
+        <div class="row mb-3">
+            <label for="end_message" class="col-sm-3 col-form-label">
+                <?= I18N::translate('End of custom message:') ?>
+            </label>
+            <div class="col-sm-9">
+                <textarea id="end_message" name="end_message" class="form-control font-monospace" dir="ltr" rows="4"><?= e($end_message) ?></textarea>
+                <p class="text-muted">
+                    <?= I18N::translate('The most common tags:') ?> 
+                    <code>&lt;b&gt;<b><?= I18N::translate('bold') ?></b>&lt;/b&gt;,</code> 
+                    <code>&lt;i&gt;<i><?= I18N::translate('italic') ?></i>&lt;/i&gt;,</code>
+                    <code>&lt;u&gt;<u><?= I18N::translate('underline') ?></u>&lt;/u&gt;</code>
+                </p>
+            </div>
+        </div>
+</div>
 <button class="btn btn-primary" id="submit" style="width: 200px">
     <?php echo view('icons/save'); ?>
     <?php echo I18N::translate('save'); ?>
 </button>
+
+<a href="<?= route(ControlPanel::class) ?>" class="btn btn-secondary">
+    <?= view('icons/cancel') ?>
+    <?= I18N::translate('cancel') ?>
+</a>
 
 <?php echo csrf_field(); ?>
 </form>
