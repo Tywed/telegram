@@ -243,7 +243,21 @@ class CronJob implements RequestHandlerInterface
 
         $context  = stream_context_create($options);
 
-        file_get_contents($url, false, $context);
+        try {
+            $response = file_get_contents($url, false, $context);
 
+            if ($response === false) {
+                throw new \Exception('Error sending the message');
+            }
+
+            $responseData = json_decode($response, true);
+
+            if (isset($responseData['ok']) && !$responseData['ok']) {
+                throw new \Exception('Telegram API error: ' . $responseData['description']);
+            }
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            echo "An error occurred while sending the message. Please check the correctness of the tags supported by Telegram in the custom parts of the message.";
+        }
     }
 }
