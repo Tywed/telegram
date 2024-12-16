@@ -230,6 +230,7 @@ class CronJob implements RequestHandlerInterface
             'chat_id' => $telegramId,
             'text' => $message,
             'parse_mode' => 'html',
+            'disable_web_page_preview' => true,
         ];
 
         $options = [
@@ -241,6 +242,8 @@ class CronJob implements RequestHandlerInterface
         ];
 
         $context  = stream_context_create($options);
+
         file_get_contents($url, false, $context);
+
     }
 }
