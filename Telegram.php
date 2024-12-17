@@ -52,7 +52,7 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
     public const CUSTOM_MODULE = 'Telegram';
     public const CUSTOM_AUTHOR = 'Tywed';
     public const CUSTOM_WEBSITE = 'https://github.com/tywed/' . self::CUSTOM_MODULE . '/';
-    public const CUSTOM_VERSION = '0.1.1';
+    public const CUSTOM_VERSION = '0.1.2';
     public const CUSTOM_LAST = self::CUSTOM_WEBSITE . 'raw/main/latest-version.txt';
     public const CUSTOM_SUPPORT_URL = self::CUSTOM_WEBSITE . 'issues';
     public const PREFIX = 'telegram';
