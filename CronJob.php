@@ -16,7 +16,6 @@ use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\User;
 use Illuminate\Support\Collection;
-use Fisharebest\Webtrees\Individual;
 
 class CronJob implements RequestHandlerInterface
 {
@@ -116,96 +115,65 @@ class CronJob implements RequestHandlerInterface
             return true;
         });
 
-        $results = $facts->map(static function (Fact $fact) use ($tree) {
-            $record = $fact->record();
-
-            if ($fact->tag() === 'INDI:BIRT') {
-                if ($record instanceof Individual) {
-                    $fullName = $record->fullName();
-                    $birthDate = $fact->date();
-                    $personLink = $record->url();
-
-                    return [
-                        'type' => 'BIRTHDAY',
-                        'fullName' => $fullName,
-                        'birthDate' => $birthDate,
-                        'link' => $personLink,
-                    ];
-                }
-            }
-
-            if ($fact->tag() === 'FAM:MARR') {
-                if ($record instanceof Family) {
-                    $husband = $record->husband();
-                    $wife = $record->wife();
-                    $marriageDate = $fact->date();
-                    $familyLink = $record->url();
-
-                    return [
-                        'type' => 'MARRIAGE',
-                        'husband' => $husband->fullName(),
-                        'wife' => $wife->fullName(),
-                        'marriageDate' => $marriageDate,
-                        'link' => $familyLink
-                    ];
-                }
-            }
-
-            return null;
-        })->filter();
-
-        return $results;
+        return $facts;
     }
 
     private function generateTelegramMessage(Collection $factList): string
     {
         $start_message = base64_decode($this->module->getPreference('start_message'));
 
-        $message = !empty($start_message) ? $start_message . "\n" : "🎉 <b>" . I18N::translate("Today's events:") . "</b>\n\n";
+        $message = !empty($start_message) ? $start_message . "\n" : "📅 <b>" . I18N::translate("Today's events:") . "</b>\n\n";
 
-        $birthdayFacts = $factList->filter(function ($fact) {
-            return $fact['type'] === 'BIRTHDAY';
-        });
+        $types = CustomOnThisDayModule::getEventLabels();
+        $messages = [];
 
-        if ($birthdayFacts->isNotEmpty()) {
-            $message .= "🎂 <b>" . I18N::translate("Birthdays:") . "</b>\n";
+        foreach ($factList as $n => $fact) {
+            $factType = $fact->tag();
+            $factType = explode(":", $factType)[1] ?? $factType;
+            if (array_key_exists($factType, $types)) {
+                if (!isset($messages[$factType])) {
+                    $messages[$factType] = "🔸 <b>{$types[$factType]}</b>:\n";
+                }
 
-            foreach ($birthdayFacts as $fact) {
-                $fullName = strip_tags($fact['fullName']);
-                $profileLink = $fact['link'];
-                $message .= "<a href=\"$profileLink\">$fullName</a>";
-                if (!empty($fact['birthDate'])) {
-                    $year = $fact['birthDate']->gregorianYear();
+                $record = $fact->record();
+                $fullName = strip_tags($record->fullName());
+                $link = $record->url();
+
+                $date = strip_tags($fact->date()->display($record->tree(), null, true));
+
+                if (PHP_INT_SIZE >= 8 || $fact->date()->gregorianYear() > 1901) {
+                    $age = '(' . Registry::timestampFactory()->now()->subtractYears($fact->anniv)->diffForHumans() . ')';
+                } else {
+                    $age = '(' . I18N::plural('%s year', '%s years', $fact->anniv, I18N::number($fact->anniv)) . ')';
+                }
+
+                $year = $fact->date()->gregorianYear();
+
+                $factText =  "<a href=\"$link\">$fullName</a>";
+
+                if (!empty($date)) {
+                    $factText .= " — <b>$date</b>";
+
                     if ($year > 0) {
-                        $age = $this->age($year);
-                        $message .= " <b>($year/$age)</b>\n";
+                        $factText .= " <b> $age</b>";
                     }
                 }
+               
+                if ($fact->place()->gedcomName() !== '') {
+                    $placeUrl = $fact->place()->url();
+                    $placeFullName = strip_tags($fact->place()->fullName());
+
+                    $factText .= " — <a href=\"$placeUrl\">$placeFullName</a>";
+                }
+
+                $factText .= ".\n";
+               
+                $messages[$factType] .= $factText . "\n";
             }
         }
 
-        $marriageFacts = $factList->filter(function ($fact) {
-            return $fact['type'] === 'MARRIAGE';
-        });
-
-        if ($marriageFacts->isNotEmpty()) {
-            $message .= "\n💍 <b>" . I18N::translate("Wedding days:") . "</b>\n";
-
-            foreach ($marriageFacts as $fact) {
-                $husband =  strip_tags($fact['husband']);
-                $wife =  strip_tags($fact['wife']);
-
-                $familyLink = $fact['link'];
-
-                $message .= "<a href=\"$familyLink\">$husband & $wife</a>";
-                if (!empty($fact['marriageDate'])) {
-                    $year = $fact['marriageDate']->gregorianYear();
-                    if ($year > 0) {
-                        $age = $this->age($year);
-                        $message .= " <b>($year/$age)</b>\n";
-                    }
-                }
-            }
+        foreach ($messages as $factType => $factMessage) {
+            $message .= $factMessage;
         }
 
         $end_message = $this->module->getPreference('end_message');
@@ -214,13 +182,6 @@ class CronJob implements RequestHandlerInterface
         }
 
         return $message;
-    }
-
-    private function age($date)
-    {
-        $currentYear = (new \DateTime())->format('Y');
-        $age = $currentYear -  $date;
-        return $age;
     }
 
     private function sendTelegramMessage(string $telegramToken, string $telegramId, string $message): void
