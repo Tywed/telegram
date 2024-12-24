@@ -38,7 +38,6 @@ use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Module\ModuleConfigTrait;
 use Fisharebest\Webtrees\FlashMessages;
-use Fisharebest\Webtrees\Module\OnThisDayModule;
 use Fisharebest\Webtrees\Services\UserService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Tywed\Webtrees\Module\Telegram\CronJob as TelegramCronJob;
@@ -52,7 +51,7 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
     public const CUSTOM_MODULE = 'Telegram';
     public const CUSTOM_AUTHOR = 'Tywed';
     public const CUSTOM_WEBSITE = 'https://github.com/tywed/' . self::CUSTOM_MODULE . '/';
-    public const CUSTOM_VERSION = '0.1.2';
+    public const CUSTOM_VERSION = '0.1.3';
     public const CUSTOM_LAST = self::CUSTOM_WEBSITE . 'raw/main/latest-version.txt';
     public const CUSTOM_SUPPORT_URL = self::CUSTOM_WEBSITE . 'issues';
     public const PREFIX = 'telegram';
@@ -160,6 +159,9 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
         $start_message     = $this->getPreference('start_message', '');
         $end_message     = $this->getPreference('end_message', '');
 
+        $location_display     = $this->getPreference('location_display', '2');
+        $date_display     = $this->getPreference('date_display', '1');
+
         return $this->viewResponse($this->name() . '::settings', [
             'title' => $this->title(),
             'telegram_token' => $this->getPreference('telegram_token', 'Not set'),
@@ -173,6 +175,8 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
             'filter'      => $filter,
             'start_message'      => base64_decode($start_message),
             'end_message'      => base64_decode($end_message),
+            'location_display'      => $location_display,
+            'date_display'      => $date_display,
         ]);
     }
 
@@ -188,7 +192,9 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
         $this->setPreference('filter', $params['filter']);
         $this->setPreference('start_message', base64_encode($params['start_message']));
         $this->setPreference('end_message', base64_encode($params['end_message']));
-
+        $this->setPreference('location_display', $params['location_display']);
+        $this->setPreference('date_display', $params['date_display']);
+       
         $message = I18N::translate('The preferences for the module “%s” have been updated.', $this->title());
         FlashMessages::addMessage($message, 'success');
 

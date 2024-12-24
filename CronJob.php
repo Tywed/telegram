@@ -38,7 +38,6 @@ class CronJob implements RequestHandlerInterface
 
     public function handle(Request $request): Response
     {
-
         $telegram_token = $this->module->getPreference('telegram_token');
         $telegram_id = $this->module->getPreference('telegram_id');
         $user = $this->module->getPreference('user');
@@ -82,8 +81,12 @@ class CronJob implements RequestHandlerInterface
         $factList =  $this->todayFacts($event_array, $startJd, $endJd, $tree, $filter);
 
         if ($factList->isNotEmpty()) {
-            $message = $this->generateTelegramMessage($factList);
-            $this->sendTelegramMessage($telegram_token, $telegram_id, $message);
+            $messages = $this->generateTelegramMessage($factList);
+
+            foreach ($messages as $message) {
+                $this->sendTelegramMessage($telegram_token, $telegram_id, $message);
+                sleep(1);
+            }
         }
 
         Auth::logout();
@@ -118,19 +121,26 @@ class CronJob implements RequestHandlerInterface
         return $facts;
     }
 
-    private function generateTelegramMessage(Collection $factList): string
+    private function generateTelegramMessage(Collection $factList): array
     {
         $start_message = base64_decode($this->module->getPreference('start_message'));
+        $start_message = !empty($start_message) ? $start_message . "\n" : "🗓 <b>" . I18N::translate("Today's events:") . "</b>\n\n";
+        $start_length = mb_strlen($start_message);
 
-        $message = !empty($start_message) ? $start_message . "\n" : "📅 <b>" . I18N::translate("Today's events:") . "</b>\n\n";
+        $end_message = $this->module->getPreference('end_message');
+        $end_message = !empty($end_message) ? "\n" . base64_decode($end_message) : '';
+        $end_length = mb_strlen($end_message);
+
+        $location_display    = $this->module->getPreference('location_display ', '2');
+        $date_display    = (bool) $this->module->getPreference('date_display ', '1');
 
         $types = CustomOnThisDayModule::getEventLabels();
         $messages = [];
 
-        foreach ($factList as $n => $fact) {
-            $factType = $fact->tag();
-            $factType = explode(":", $factType)[1] ?? $factType;
-            if (array_key_exists($factType, $types)) {
+        foreach ($factList as $fact) {
+            $factType = explode(":", $fact->tag())[1] ?? $fact->tag();
+
+            if (isset($types[$factType])) {
                 if (!isset($messages[$factType])) {
                     $messages[$factType] = "🔸 <b>{$types[$factType]}</b>:\n";
                 }
@@ -141,47 +151,76 @@ class CronJob implements RequestHandlerInterface
 
                 $date = strip_tags($fact->date()->display($record->tree(), null, true));
 
-                if (PHP_INT_SIZE >= 8 || $fact->date()->gregorianYear() > 1901) {
-                    $age = '(' . Registry::timestampFactory()->now()->subtractYears($fact->anniv)->diffForHumans() . ')';
-                } else {
-                    $age = '(' . I18N::plural('%s year', '%s years', $fact->anniv, I18N::number($fact->anniv)) . ')';
-                }
+                $age = (PHP_INT_SIZE >= 8 || $fact->date()->gregorianYear() > 1901)
+                    ? '(' . Registry::timestampFactory()->now()->subtractYears($fact->anniv)->diffForHumans() . ')'
+                    : '(' . I18N::plural('%s year', '%s years', $fact->anniv, I18N::number($fact->anniv)) . ')';
 
-                $year = $fact->date()->gregorianYear();
+                $factText = "<a href=\"$link\">$fullName</a>";
 
-                $factText =  "<a href=\"$link\">$fullName</a>";
-
-                if (!empty($date)) {
+                if ($date && $date_display) {
                     $factText .= " — <b>$date</b>";
 
-                    if ($year > 0) {
-                        $factText .= " <b> $age</b>";
+                    if ($fact->date()->gregorianYear() > 0) {
+                        $factText .= " <b>$age</b>";
                     }
                 }
-               
-                if ($fact->place()->gedcomName() !== '') {
-                    $placeUrl = $fact->place()->url();
-                    $placeFullName = strip_tags($fact->place()->fullName());
 
-                    $factText .= " — <a href=\"$placeUrl\">$placeFullName</a>";
+                if ($location_display !== 0 && $fact->place()->gedcomName() !== '') {
+                    if ($location_display == 1) {
+                        $placeName = strip_tags($fact->place()->shortName());
+                    } else {
+                        $placeName = strip_tags($fact->place()->fullName());
+                    }
+
+                    $placeUrl = $fact->place()->url();
+                    $factText .= " — <a href=\"$placeUrl\">$placeName</a>";
                 }
 
                 $factText .= ".\n";
-               
-                $messages[$factType] .= $factText . "\n";
+                $messages[$factType] .= $factText;
             }
         }
 
-        foreach ($messages as $factType => $factMessage) {
+        $message = $start_message;
+        $messageLength = $start_length;
+
+        foreach ($messages as $factMessage) {
             $message .= $factMessage;
+            $messageLength += mb_strlen($factMessage);
         }
 
-        $end_message = $this->module->getPreference('end_message');
-        if (!empty($end_message)) {
-            $message .= "\n" . base64_decode($end_message);
+        $message .= $end_message;
+        $messageLength += $end_length;
+
+        if ($messageLength <= 4096) {
+            return [$message];
         }
 
-        return $message;
+        $messagesToSend = [];
+        $currentMessage = $start_message;
+        $currentLength = $start_length;
+
+        foreach ($messages as $factMessage) {
+            if ($currentLength + mb_strlen($factMessage) <= 4096) {
+                $currentMessage .= $factMessage;
+                $currentLength += mb_strlen($factMessage);
+            } else {
+                $messagesToSend[] = $currentMessage;
+                $currentMessage = $factMessage;
+                $currentLength = mb_strlen($factMessage);
+            }
+        }
+
+        if ($currentLength + mb_strlen($end_message) <= 4096) {
+            $currentMessage .= $end_message;
+        } else {
+            $messagesToSend[] = $currentMessage;
+            $currentMessage = $start_message . $end_message;
+        }
+
+        $messagesToSend[] = $currentMessage;
+
+        return $messagesToSend;
     }
 
     private function sendTelegramMessage(string $telegramToken, string $telegramId, string $message): void

@@ -2,9 +2,9 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 ![webtrees major version](https://img.shields.io/badge/webtrees-v2.2.x-green)
-![Latest Release](https://img.shields.io/badge/release-v0.1.2-blue)
+![Latest Release](https://img.shields.io/badge/release-v0.1.3-blue)
 
-This [webtrees](https://www.webtrees.net/) custom module sends Telegram notifications about significant family events such as birthdays and anniversaries based on the data from your webtrees installation.
+This [webtrees](https://www.webtrees.net/) custom module sends Telegram notifications about significant family events, such as birthdays and anniversaries, based on the data from your webtrees installation.
 
 ## Contents
 This Readme contains the following main sections:
@@ -26,32 +26,33 @@ Before installing this module on your main site, we recommend testing it on a st
 <a name="description"></a>
 ## Description
 
-This custom module for webtrees integrates with Telegram to send notifications about today's significant family events, such as:
+This custom module for webtrees integrates with Telegram to send notifications about significant family events, including but not limited to birthdays, anniversaries, and other key milestones.
 
-- **Birthdays**: Notifies about individuals' birthdays.
-- **Marriage Anniversaries**: Notifies about marriage anniversaries.
+### Changes to Event Types:
+Previously, the module only supported events related to **living** individuals (e.g., birthdays and marriage anniversaries). Now, it has been updated to support notifications for **all events**, whether they involve living or deceased individuals. This means you can now receive notifications for important events for all family members.
 
-The module is designed to be easily configurable from the webtrees admin panel. You can configure it to send notifications to a specific Telegram chat (or group) with your preferred Telegram Bot.
+### Supported Events:
+- **All Events**: Notifications can be configured for any event types defined in your webtrees installation.
 
 ### Features:
-- **Telegram Bot Integration**: Allows sending messages using a Telegram bot.
-- **Event Types**: Supports notifications for birthdays and marriage anniversaries.
+- **Telegram Bot Integration**: Sends messages using a Telegram bot.
+- **Event Types**: Now supports a wider range of events, including those for deceased individuals.
 - **Configuration**: Set your Telegram Bot Token and chat ID in the module settings.
 - **User and Tree Preferences**: Specify the user and family tree for which you want to send notifications.
 
 <a name="screenshots"></a>
 ## Screenshots
 
-Screenshot of settings module
+Screenshot of settings module  
 <p align="center"><img src="docs/settings.JPG" alt="Screenshot of settings module" align="center" width="80%"></p>
 
-Screenshot of the message in telegram
-<p align="center"><img src="docs/message.JPG" alt="Screenshot of the message in telegram" align="center" width="85%"></p>
+Screenshot of the message in Telegram  
+<p align="center"><img src="docs/message.JPG" alt="Screenshot of the message in Telegram" align="center" width="85%"></p>
 
 <a name="requirements"></a>
 ## Requirements
 
-This module requires **webtrees** version 2.2 or later.
+This module requires **webtrees** version 2.2 or later.  
 This module has the same requirements as [webtrees system requirements](https://github.com/fisharebest/webtrees#system-requirements).
 
 This module was tested with **webtrees** 2.2.1 and later versions.
@@ -61,7 +62,7 @@ This module was tested with **webtrees** 2.2.1 and later versions.
 - Obtain your bot's token and chat ID.
 
 ### Cron Job:
-To ensure that the notifications are sent regularly (e.g., daily at midnight), you need to set up a **cron job** on your server. The link for the cron must be taken from the module settings. This will allow the script to check for events and send the corresponding notifications.
+To ensure that the notifications are sent regularly (e.g., daily at midnight), you need to set up a **cron job** on your server. The link for the cron job must be taken from the module settings. This will allow the script to check for events and send the corresponding notifications.
 
 <a name="installation"></a>
 ## Installation
@@ -96,7 +97,7 @@ To update the module:
 
 * Copyright © 2024 Tywed
 
-This module was developed of the [webtrees-reminder](https://github.com/UksusoFF/webtrees-reminder) module by Kirill Uksusov (UksusoFF).
+This module was developed based on the [webtrees-reminder](https://github.com/UksusoFF/webtrees-reminder) module by Kirill Uksusov (UksusoFF).
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

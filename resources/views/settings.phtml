@@ -83,8 +83,8 @@ use Fisharebest\Webtrees\Http\RequestHandlers\ModulesAllPage;
                 </p>
                 <fieldset class="row mb-3">
                     <div class="col-sm-12">
-                    <?= view('components/radios-inline', ['name' => 'filter', 'options' => [I18N::translate('no'), I18N::translate('yes')], 'selected' => (int) $filter]) ?>
-                    
+                        <?= view('components/radios-inline', ['name' => 'filter', 'options' => [I18N::translate('no'), I18N::translate('yes')], 'selected' => (int) $filter]) ?>
+
                     </div>
                 </fieldset>
             </div>
@@ -100,6 +100,35 @@ use Fisharebest\Webtrees\Http\RequestHandlers\ModulesAllPage;
                         <?= I18N::translate('Select the events to send messages.') ?>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?= I18N::translate('Show event location') . ':' ?>
+                </h6>
+                </p>
+                <fieldset class="row mb-3">
+                    <div class="col-sm-12">
+                        <?= view('components/radios-inline', ['name' => 'location_display', 'options' => [I18N::translate('Не показывать'), I18N::translate('Короткая запись'), I18N::translate('Полная запись')], 'selected' => (int) $location_display]) ?>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?= I18N::translate('Show event date') . ':' ?>
+                </h6>
+                </p>
+                <fieldset class="row mb-3">
+                    <div class="col-sm-12">
+                        <?= view('components/radios-inline', ['name' => 'date_display', 'options' => [I18N::translate('no'), I18N::translate('yes')], 'selected' => (int) $date_display]) ?>
+                    </div>
+                </fieldset>
             </div>
         </div>
 
@@ -126,9 +155,9 @@ use Fisharebest\Webtrees\Http\RequestHandlers\ModulesAllPage;
                 <?= I18N::translate('Starting a custom message:') ?>
             </label>
             <div class="col-sm-9">
-                <textarea id="start_message" name="start_message" class="form-control font-monospace" dir="ltr" rows="4"><?= e($start_message) ?></textarea>
+                <textarea id="start_message" name="start_message" class="form-control font-monospace" dir="ltr" maxlength="1000" rows="4"><?= e($start_message) ?></textarea>
                 <p class="text-muted">
-                   <a href="https://core.telegram.org/bots/api#html-style"> <?= I18N::translate('Only use tags that telegram supports') ?></a>
+                    <a href="https://core.telegram.org/bots/api#html-style"> <?= I18N::translate('Only use tags that telegram supports') ?></a>
                 </p>
             </div>
         </div>
@@ -138,10 +167,10 @@ use Fisharebest\Webtrees\Http\RequestHandlers\ModulesAllPage;
                 <?= I18N::translate('End of custom message:') ?>
             </label>
             <div class="col-sm-9">
-                <textarea id="end_message" name="end_message" class="form-control font-monospace" dir="ltr" rows="4"><?= e($end_message) ?></textarea>
+                <textarea id="end_message" name="end_message" class="form-control font-monospace" dir="ltr" maxlength="1000" rows="4"><?= e($end_message) ?></textarea>
                 <p class="text-muted">
-                    <?= I18N::translate('The most common tags:') ?> 
-                    <code>&lt;b&gt;<b><?= I18N::translate('bold') ?></b>&lt;/b&gt;,</code> 
+                    <?= I18N::translate('The most common tags:') ?>
+                    <code>&lt;b&gt;<b><?= I18N::translate('bold') ?></b>&lt;/b&gt;,</code>
                     <code>&lt;i&gt;<i><?= I18N::translate('italic') ?></i>&lt;/i&gt;,</code>
                     <code>&lt;u&gt;<u><?= I18N::translate('underline') ?></u>&lt;/u&gt;</code>
                 </p>
