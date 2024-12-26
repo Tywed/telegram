@@ -22,4 +22,6 @@ return [
     'bold' => 'vet',
     'italic' => 'cursief',
     'underline' => 'onderstreept',
+    'short record' => 'korte opname',
+    'full record' => 'volledige opname',
 ];

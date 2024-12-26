@@ -22,4 +22,6 @@ return [
     'bold' => 'жирный',
     'italic' => 'курсив',
     'underline' => 'подчеркнутый',
+    'short record' => 'короткая запись',
+    'full record' => 'полная запись',
 ];

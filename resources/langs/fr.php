@@ -22,4 +22,6 @@ return [
     'bold' => 'gras',
     'italic' => 'italique',
     'underline' => 'souligné',
+    'short record' => 'enregistrement court',
+    'full record' => 'enregistrement complet',
 ];

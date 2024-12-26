@@ -22,4 +22,6 @@ return [
     'bold' => 'fett',
     'italic' => 'kursiv',
     'underline' => 'unterstrichen',
+    'short record' => 'kurzer Eintrag',
+    'full record' => 'voller Eintrag',
 ];

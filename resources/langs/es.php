@@ -22,4 +22,6 @@ return [
     'bold' => 'negrita',
     'italic' => 'cursiva',
     'underline' => 'subrayado',
+    'short record' => 'registro corto',
+    'full record' => 'registro completo',
 ];

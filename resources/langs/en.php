@@ -22,4 +22,6 @@ return [
     'bold' => 'bold',
     'italic' => 'italic',
     'underline' => 'underline',
+    'short record' => 'short record',
+    'full record' => 'full record',
 ];

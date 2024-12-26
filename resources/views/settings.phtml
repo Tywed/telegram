@@ -113,7 +113,7 @@ use Fisharebest\Webtrees\Http\RequestHandlers\ModulesAllPage;
                 </p>
                 <fieldset class="row mb-3">
                     <div class="col-sm-12">
-                        <?= view('components/radios-inline', ['name' => 'location_display', 'options' => [I18N::translate('Не показывать'), I18N::translate('Короткая запись'), I18N::translate('Полная запись')], 'selected' => (int) $location_display]) ?>
+                        <?= view('components/radios-inline', ['name' => 'location_display', 'options' => [I18N::translate('no'), I18N::translate('short record'), I18N::translate('full record')], 'selected' => (int) $location_display]) ?>
                     </div>
                 </fieldset>
             </div>
