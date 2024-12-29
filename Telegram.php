@@ -147,7 +147,7 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
         $trees = $this->trees->all();
         $treeOptions = [];
         foreach ($trees as $tree) {
-            $treeOptions[$tree->id()] = $tree->name();  
+            $treeOptions[$tree->id()] = $tree->name();
         }
 
         $default_events = implode(',', CustomOnThisDayModule::getDefaultEvents());
@@ -194,7 +194,7 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
         $this->setPreference('end_message', base64_encode($params['end_message']));
         $this->setPreference('location_display', $params['location_display']);
         $this->setPreference('date_display', $params['date_display']);
-       
+
         $message = I18N::translate('The preferences for the module “%s” have been updated.', $this->title());
         FlashMessages::addMessage($message, 'success');
 

@@ -43,16 +43,16 @@ Previously, the module only supported events related to **living** individuals (
 <a name="screenshots"></a>
 ## Screenshots
 
-Screenshot of settings module  
+Screenshot of settings module
 <p align="center"><img src="docs/settings.JPG" alt="Screenshot of settings module" align="center" width="80%"></p>
 
-Screenshot of the message in Telegram  
+Screenshot of the message in Telegram
 <p align="center"><img src="docs/message.JPG" alt="Screenshot of the message in Telegram" align="center" width="85%"></p>
 
 <a name="requirements"></a>
 ## Requirements
 
-This module requires **webtrees** version 2.2 or later.  
+This module requires **webtrees** version 2.2 or later.
 This module has the same requirements as [webtrees system requirements](https://github.com/fisharebest/webtrees#system-requirements).
 
 This module was tested with **webtrees** 2.2.1 and later versions.
