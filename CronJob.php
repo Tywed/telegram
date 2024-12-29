@@ -124,7 +124,7 @@ class CronJob implements RequestHandlerInterface
     private function generateTelegramMessage(Collection $factList): array
     {
         $start_message = base64_decode($this->module->getPreference('start_message'));
-        $start_message = !empty($start_message) ? $start_message . "\n" : "🗓 <b>" . I18N::translate("Today's events:") . "</b>\n\n";
+        $start_message = !empty($start_message) ? $start_message . "\n" : "🗓 <b>" . I18N::translate("Today's events:") . "</b>";
         $start_length = mb_strlen($start_message);
 
         $end_message = $this->module->getPreference('end_message');
@@ -142,7 +142,25 @@ class CronJob implements RequestHandlerInterface
 
             if (isset($types[$factType])) {
                 if (!isset($messages[$factType])) {
-                    $messages[$factType] = "🔸 <b>{$types[$factType]}</b>:\n";
+                    switch ($factType) {
+                        case 'BIRT':
+                            $message_icon = '🎂';
+                            break;
+                        case 'MARR':
+                            $message_icon = '💍';
+                            break;
+                        case 'DEAT':
+                            $message_icon = '☠️';
+                            break;
+                        case 'BURI':
+                            $message_icon = '⚰️';
+                            break;
+                        default:
+                            $message_icon = '🔸';
+                            break;
+                    }
+
+                    $messages[$factType] = "\n\n" . $message_icon . " <b>{$types[$factType]}</b>:";
                 }
 
                 $record = $fact->record();
@@ -155,13 +173,13 @@ class CronJob implements RequestHandlerInterface
                     ? '(' . Registry::timestampFactory()->now()->subtractYears($fact->anniv)->diffForHumans() . ')'
                     : '(' . I18N::plural('%s year', '%s years', $fact->anniv, I18N::number($fact->anniv)) . ')';
 
-                $factText = "<a href=\"$link\">$fullName</a>";
+                $factText = "\n<a href=\"$link\">$fullName</a>";
 
                 if ($date && $date_display) {
                     $factText .= " — <b>$date</b>";
 
                     if ($fact->date()->gregorianYear() > 0) {
-                        $factText .= " <b>$age</b>";
+                        $factText .= " $age";
                     }
                 }
 
@@ -176,7 +194,6 @@ class CronJob implements RequestHandlerInterface
                     $factText .= " — <a href=\"$placeUrl\">$placeName</a>";
                 }
 
-                $factText .= ".\n";
                 $messages[$factType] .= $factText;
             }
         }
