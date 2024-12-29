@@ -231,6 +231,8 @@ class CronJob implements RequestHandlerInterface
             'text' => $message,
             'parse_mode' => 'html',
             'disable_web_page_preview' => true,
+            'disable_notification' => (bool) $this->module->getPreference('disable_notification'),
+            'protect_content' => (bool) $this->module->getPreference('protect_content'),
         ];
 
         $options = [

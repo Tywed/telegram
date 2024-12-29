@@ -26,4 +26,8 @@ return [
     'full record' => 'voller Eintrag',
     'Show event location' => 'Zeige Ereignisort',
     'Show event date' => 'Zeige Ereignisdatum',
+    'Disable notification sound' => 'Deaktiviere Benachrichtigungston',
+    'If set to \'yes\', users receive a notification but without sound.' => 'Wenn auf \'Ja\' gesetzt, erhalten Benutzer eine Benachrichtigung, jedoch ohne Ton.',
+    'Protect content' => 'Schütze Inhalt',
+    'If set to \'yes\', message from the bot can\'t be forwarded.' => 'Wenn auf \'Ja\' gesetzt, wird das Weiterleiten der Botnachricht unterbunden.',
 ];
