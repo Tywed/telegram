@@ -133,6 +133,39 @@ use Fisharebest\Webtrees\Http\RequestHandlers\ModulesAllPage;
         </div>
 
         <div class="row mb-3">
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?= I18N::translate('Disable notification sound') . ':' ?>
+                </h6>
+                </p>
+                <fieldset class="row mb-3">
+                    <div class="col-sm-12">
+                        <?= view('components/radios-inline', ['name' => 'disable_notification', 'options' => [I18N::translate('no'), I18N::translate('yes')], 'selected' => (int) $disable_notification]) ?>
+                    </div>
+                    <div class="form-text" id="notification-description">
+                        <?= I18N::translate('If set to \'yes\', users receive a notification but without sound.') ?>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?= I18N::translate('Protect content') . ':' ?>
+                </h6>
+                </p>
+                <fieldset class="row mb-3">
+                    <div class="col-sm-12">
+                        <?= view('components/radios-inline', ['name' => 'protect_content', 'options' => [I18N::translate('no'), I18N::translate('yes')], 'selected' => (int) $protect_content]) ?>
+                    </div>
+                    <div class="form-text" id="protect-content-description">
+                        <?= I18N::translate('If set to \'yes\', message from the bot can\'t be forwarded.') ?>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+
+        <div class="row mb-3">
             <p>
             <h6>
                 <?php echo I18N::translate('URL') . ':'; ?>

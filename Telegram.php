@@ -162,6 +162,9 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
         $location_display     = $this->getPreference('location_display', '2');
         $date_display     = $this->getPreference('date_display', '1');
 
+        $disable_notification = $this->getPreference('disable_notification', '1');
+        $protect_content = $this->getPreference('protect_content', '1');
+
         return $this->viewResponse($this->name() . '::settings', [
             'title' => $this->title(),
             'telegram_token' => $this->getPreference('telegram_token', 'Not set'),
@@ -177,6 +180,8 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
             'end_message'      => base64_decode($end_message),
             'location_display'      => $location_display,
             'date_display'      => $date_display,
+            'disable_notification' => $disable_notification,
+            'protect_content' => $protect_content,
         ]);
     }
 
@@ -194,6 +199,8 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
         $this->setPreference('end_message', base64_encode($params['end_message']));
         $this->setPreference('location_display', $params['location_display']);
         $this->setPreference('date_display', $params['date_display']);
+        $this->setPreference('disable_notification', $params['disable_notification']);
+        $this->setPreference('protect_content', $params['protect_content']);
 
         $message = I18N::translate('The preferences for the module “%s” have been updated.', $this->title());
         FlashMessages::addMessage($message, 'success');
