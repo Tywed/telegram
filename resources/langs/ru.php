@@ -24,4 +24,6 @@ return [
     'underline' => 'подчеркнутый',
     'short record' => 'короткая запись',
     'full record' => 'полная запись',
+    'Show event location' => 'Показать место событий',
+    'Show event date' => 'Показать дату события',
 ];

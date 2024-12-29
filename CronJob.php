@@ -131,8 +131,8 @@ class CronJob implements RequestHandlerInterface
         $end_message = !empty($end_message) ? "\n" . base64_decode($end_message) : '';
         $end_length = mb_strlen($end_message);
 
-        $location_display    = $this->module->getPreference('location_display ', '2');
-        $date_display    = (bool) $this->module->getPreference('date_display ', '1');
+        $location_display    = $this->module->getPreference('location_display', '2');
+        $date_display    = (bool) $this->module->getPreference('date_display', '1');
 
         $types = CustomOnThisDayModule::getEventLabels();
         $messages = [];

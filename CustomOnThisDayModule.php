@@ -10,12 +10,12 @@ use ReflectionClass;
 
 class CustomOnThisDayModule
 {
- 
+
     public static function getAllEvents(): array
     {
         $reflection = new ReflectionClass(OnThisDayModule::class);
         $constant = $reflection->getConstant('ALL_EVENTS');
-        
+
         return $constant;
     }
 
@@ -23,14 +23,14 @@ class CustomOnThisDayModule
     {
         $reflection = new ReflectionClass(OnThisDayModule::class);
         $constant = $reflection->getConstant('DEFAULT_EVENTS');
-        
+
         return $constant;
     }
 
     public static function getEventLabels(): array
     {
         $all_events = self::getAllEvents();
-        
+
         foreach ($all_events as $event => $tag) {
             $all_events[$event] = Registry::elementFactory()->make($tag)->label();
         }

@@ -24,4 +24,6 @@ return [
     'underline' => 'underline',
     'short record' => 'short record',
     'full record' => 'full record',
+    'Show event location' => 'Show event location',
+    'Show event date' => 'Show event date',
 ];
