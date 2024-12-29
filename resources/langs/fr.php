@@ -26,4 +26,8 @@ return [
     'full record' => 'enregistrement complet',
     'Show event location' => 'Montrez le lieu des événements',
     'Show event date' => 'Date de l événement Show',
+    'Disable notification sound' => 'Disable notification sound',
+    'If set to \'yes\', users receive a notification but without sound.' => 'If set to \'yes\', users receive a notification but without sound.',
+    'Protect content' => 'Protect content',
+    'If set to \'yes\', message from the bot can\'t be forwarded.' => 'If set to \'yes\', message from the bot can\'t be forwarded.',
 ];
