@@ -24,4 +24,6 @@ return [
     'underline' => 'subrayado',
     'short record' => 'registro corto',
     'full record' => 'registro completo',
+    'Show event location' => 'Mostrar el lugar de los eventos',
+    'Show event date' => 'Mostrar fecha del evento',
 ];

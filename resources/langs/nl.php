@@ -24,4 +24,6 @@ return [
     'underline' => 'onderstreept',
     'short record' => 'korte opname',
     'full record' => 'volledige opname',
+    'Show event location' => 'Toon de plaats van evenementen',
+    'Show event date' => 'Toon evenementendatum',
 ];
