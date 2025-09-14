@@ -2,7 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 ![webtrees major version](https://img.shields.io/badge/webtrees-v2.2.x-green)
-![Latest Release](https://img.shields.io/badge/release-v0.1.3-blue)
+![Latest Release](https://img.shields.io/badge/release-v0.2.0-blue)
 
 This [webtrees](https://www.webtrees.net/) custom module sends Telegram notifications about significant family events, such as birthdays and anniversaries, based on the data from your webtrees installation.
 
@@ -28,17 +28,17 @@ Before installing this module on your main site, we recommend testing it on a st
 
 This custom module for webtrees integrates with Telegram to send notifications about significant family events, including but not limited to birthdays, anniversaries, and other key milestones.
 
-### Changes to Event Types:
-Previously, the module only supported events related to **living** individuals (e.g., birthdays and marriage anniversaries). Now, it has been updated to support notifications for **all events**, whether they involve living or deceased individuals. This means you can now receive notifications for important events for all family members.
-
 ### Supported Events:
 - **All Events**: Notifications can be configured for any event types defined in your webtrees installation.
 
 ### Features:
 - **Telegram Bot Integration**: Sends messages using a Telegram bot.
 - **Event Types**: Now supports a wider range of events, including those for deceased individuals.
-- **Configuration**: Set your Telegram Bot Token and chat ID in the module settings.
+- **Configuration**: Set your Telegram Bot Token and chat ID in the module settings. You can specify the ID of a Telegram user, channel, or group.
 - **User and Tree Preferences**: Specify the user and family tree for which you want to send notifications.
+- **Per-configuration intro/outro**: Optional custom start/end text for daily events messages.
+- **Daily changes digest**: Separate daily digest of recent changes (who, when, which record) with its own cron endpoint.
+- **Admin test message**: Send a quick test message to verify Bot Token + Chat ID from the settings page.
 
 <a name="screenshots"></a>
 ## Screenshots
@@ -52,17 +52,37 @@ Screenshot of the message in Telegram
 <a name="requirements"></a>
 ## Requirements
 
-This module requires **webtrees** version 2.2 or later.
+This module requires **webtrees** version 2.1 or later.
 This module has the same requirements as [webtrees system requirements](https://github.com/fisharebest/webtrees#system-requirements).
 
-This module was tested with **webtrees** 2.2.1 and later versions.
+This module was tested with **webtrees** 2.2.4 and later versions.
 
 ### Telegram Bot:
 - Create a Telegram bot using [BotFather](https://core.telegram.org/bots/tutorial#obtain-your-bot-token).
 - Obtain your bot's token and chat ID.
 
-### Cron Job:
-To ensure that the notifications are sent regularly (e.g., daily at midnight), you need to set up a **cron job** on your server. The link for the cron job must be taken from the module settings. This will allow the script to check for events and send the corresponding notifications.
+### Cron Jobs:
+To ensure that the notifications are sent regularly (e.g., daily), set up cron jobs on your server. The exact URLs are shown on the module settings page.
+
+1) Daily events (birthdays, anniversaries, etc.)
+
+Example schedule (runs at 09:00 every day). Copy the actual URL from the module settings page.
+
+```
+0 9 * * * wget -O - -q "<URL from module settings>"
+```
+
+2) Daily changes digest (recent edits in the tree; record, when, who)
+
+Example schedule (runs at 09:00 every day). Copy the actual URL from the module settings page.
+
+```
+0 20 * * * wget -O - -q "<URL from module settings>"
+```
+
+Notes:
+- The changes digest ignores custom start/end texts and uses a fixed localized header.
+- Use separate schedules if you want events and changes at different times.
 
 <a name="installation"></a>
 ## Installation
@@ -75,7 +95,10 @@ Follow these steps to install the module:
 4. In the settings, enter your **Telegram Bot Token** and **Telegram Chat ID**.
 5. Set the **User** and **Tree** from which you want to send the events.
 6. Enable the module and click **Save**.
-7. **Set up a cron job** on your server to trigger the module at regular intervals (e.g., daily).
+7. **Set up cron jobs** on your server for daily events and (optionally) daily changes digest.
+
+### Testing the connection
+- On the settings page, use the **Send test message** button to quickly verify your Bot Token and Chat ID.
 
 <a name="upgrade"></a>
 ## Upgrade

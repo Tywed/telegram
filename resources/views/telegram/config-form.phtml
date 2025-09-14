@@ -1,0 +1,228 @@
+<?php
+
+declare(strict_types=1);
+
+use Fisharebest\Webtrees\Http\RequestHandlers\ControlPanel;
+use Fisharebest\Webtrees\Http\RequestHandlers\ModulesAllPage;
+use Fisharebest\Webtrees\I18N;
+use Fisharebest\Webtrees\View;
+
+/**
+ * @var string $title
+ * @var array|null $config
+ * @var array<int, \Fisharebest\Webtrees\User> $users
+ * @var array<int, \Fisharebest\Webtrees\Tree> $trees
+ * @var array<string, string> $events
+ * @var array<string> $defaultEvents
+ * @var array<string, string> $eventLabels
+ * @var string $formAction
+ * @var string $submitText
+ * @var \Tywed\Webtrees\Module\Telegram\Telegram $module
+ */
+
+$isEdit = $config !== null;
+
+?>
+
+<?php echo view('components/breadcrumbs', ['links' => [route(ControlPanel::class) => I18N::translate('Control panel'), route(ModulesAllPage::class) => I18N::translate('Modules'), route('module', ['module' => $module->name(), 'action' => 'Admin']) => I18N::translate('Telegram Configurations'), $title]]) ?>
+
+<h1><?php echo $title ?></h1>
+
+<h5>
+    <?php echo I18N::translate('Configuration settings'); ?>
+</h5>
+
+<div>
+    <form method="post" class="row" action="<?php echo $formAction ?>">
+        <?php echo csrf_field() ?>
+        <input type="hidden" name="action" value="<?php echo $isEdit ? 'update' : 'store' ?>">
+        <?php if ($isEdit) : ?>
+            <input type="hidden" name="id" value="<?php echo e($config['id']) ?>">
+        <?php endif ?>
+        <div class="row mb-3">
+            <div class="col-sm-12">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('Configuration Name:'); ?>
+                </h6>
+                </p>
+                <div class="mb-3">
+                    <input type="text" id="name" class="form-control" name="name" dir="auto" value="<?php echo e($config['name'] ?? I18N::translate('New Configuration')) ?>" required>
+                    <div class="form-text" id="name-description">
+                        <?php echo I18N::translate('A descriptive name for this configuration (e.g., "Birthdays for My Family").') ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('Enabled') . ':'; ?>
+                </h6>
+                </p>
+                <fieldset class="row mb-3">
+                    <div class="col-sm-12">
+                        <?php echo view('components/radios-inline', ['name' => 'enabled', 'options' => [I18N::translate('no'), I18N::translate('yes')], 'selected' => (int) ($config['enabled'] ?? '1')]) ?>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('API Token Telegram bot:'); ?>
+                </h6>
+                </p>
+                <div class="mb-3">
+                    <input type="text" id="bot_token" class="form-control" name="bot_token" dir="auto" value="<?php echo e($config['bot_token'] ?? '') ?>" required>
+                    <div class="form-text" id="telegram-token-description">
+                        <?php echo I18N::translate('Obtain Your Bot Token using') ?> <a href="https://core.telegram.org/bots/tutorial#obtain-your-bot-token"> BotFather.</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('Telegram ID:'); ?>
+                </h6>
+                </p>
+                <div class="mb-3">
+                    <input type="text" id="chat_id" class="form-control" name="chat_id" dir="auto" value="<?php echo e($config['chat_id'] ?? '') ?>" required>
+                    <div class="form-text" id="telegram-id-description">
+                        <?php echo I18N::translate('You can specify the ID of a telegram user, channel, or group.') ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('User') . ':'; ?>
+                </h6>
+                </p>
+                <div class="mb-3">
+                    <?php echo view('components/select', ['name' => 'user_id', 'selected' => $config['user_id'] ?? '', 'options' => array_map(fn($user) => $user->realName(), $users)]) ?>
+                    <div class="form-text" id="users-description">
+                        <?php echo I18N::translate('Select the user whose privacy and language settings will be used when creating event lists.') ?>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('Tree') . ':'; ?>
+                </h6>
+                </p>
+                <div class="mb-3">
+                    <?php echo view('components/select', ['name' => 'tree_id', 'selected' => $config['tree_id'] ?? '', 'options' => array_map(fn($tree) => $tree->title(), $trees)]) ?>
+                    <div class="form-text" id="trees-description">
+                        <?php echo I18N::translate('Select a tree.') ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('Events') . ':'; ?>
+                </h6>
+                </p>
+                <div class="mb-3">
+                    <?php echo view('components/select', ['name' => 'events[]', 'id' => 'events', 'selected' => $config['events'] ?? $defaultEvents, 'options' => $eventLabels, 'class' => 'tom-select', 'multiple' => true]) ?>
+                    <div class="form-text" id="event-description">
+                        <?php echo I18N::translate('Select the events to send messages.') ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('Show only events for living individuals') . ':'; ?>
+                </h6>
+                </p>
+                <fieldset class="row mb-3">
+                    <div class="col-sm-12">
+                        <?php echo view('components/radios-inline', ['name' => 'filter', 'options' => [I18N::translate('no'), I18N::translate('yes')], 'selected' => (int) ($config['filter'] ?? '1')]) ?>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('Show event location') . ':'; ?>
+                </h6>
+                </p>
+                <fieldset class="row mb-3">
+                    <div class="col-sm-12">
+                        <?php echo view('components/radios-inline', ['name' => 'location_display', 'options' => [I18N::translate('no'), I18N::translate('short record'), I18N::translate('full record')], 'selected' => (int) ($config['location_display'] ?? '2')]) ?>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-sm-6">
+                <p>
+                <h6>
+                    <?php echo I18N::translate('Show event date') . ':'; ?>
+                </h6>
+                </p>
+                <fieldset class="row mb-3">
+                    <div class="col-sm-12">
+                        <?php echo view('components/radios-inline', ['name' => 'date_display', 'options' => [I18N::translate('no'), I18N::translate('yes')], 'selected' => (int) ($config['date_display'] ?? '1')]) ?>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+
+        <div>
+            <h6 class="text-center">
+                <?php echo I18N::translate('Message settings') . ':'; ?>
+            </h6>
+        </div>
+        <div class="row mb-3">
+            <label for="start_message" class="col-sm-3 col-form-label">
+                <?php echo I18N::translate('Starting a custom message:') ?>
+            </label>
+            <div class="col-sm-9">
+                <textarea id="start_message" name="start_message" class="form-control font-monospace" dir="ltr" maxlength="1000" rows="4"><?php echo e($config['start_message'] ?? '') ?></textarea>
+                <p class="text-muted">
+                    <a href="https://core.telegram.org/bots/api#html-style"> <?php echo I18N::translate('Only use tags that telegram supports') ?></a>
+                </p>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="end_message" class="col-sm-3 col-form-label">
+                <?php echo I18N::translate('End of custom message:') ?>
+            </label>
+            <div class="col-sm-9">
+                <textarea id="end_message" name="end_message" class="form-control font-monospace" dir="ltr" maxlength="1000" rows="4"><?php echo e($config['end_message'] ?? '') ?></textarea>
+                <p class="text-muted">
+                    <?php echo I18N::translate('The most common tags:') ?>
+                    <code>&lt;b&gt;<b><?php echo I18N::translate('bold') ?></b>&lt;/b&gt;,</code>
+                    <code>&lt;i&gt;<i><?php echo I18N::translate('italic') ?></i>&lt;/i&gt;,</code>
+                    <code>&lt;u&gt;<u><?php echo I18N::translate('underline') ?></u>&lt;/u&gt;</code>
+                </p>
+            </div>
+        </div>
+</div>
+<button class="btn btn-primary" id="submit" style="width: 200px">
+    <?php echo view('icons/save'); ?>
+    <?php echo $submitText ?>
+</button>
+
+<a href="<?php echo route('module', ['module' => $module->name(), 'action' => 'Admin']) ?>" class="btn btn-secondary">
+    <?php echo view('icons/cancel') ?>
+    <?php echo I18N::translate('cancel') ?>
+</a>
+</form>
+</div>
