@@ -83,18 +83,20 @@ class TelegramChangesCronJob implements RequestHandlerInterface
                 */
                 
                 $user = \Tywed\Webtrees\Module\Telegram\Helpers\AppHelper::get(\Fisharebest\Webtrees\Services\UserService::class)->find((int) $user_id);
-                $tree = \Tywed\Webtrees\Module\Telegram\Helpers\AppHelper::get(\Fisharebest\Webtrees\Services\TreeService::class)->find((int) $tree_id);
 
-                if (!$user || !$tree) {
+                if (!$user) {
                     $results[$configId] = [
                         'success' => false,
-                        'message' => "Configuration \"{$configName}\": User or Tree not found.",
+                        'message' => "Configuration \"{$configName}\": User not found.",
                     ];
                     continue;
                 }
 
                 Auth::login($user);
                 I18N::init($user->getPreference(User::PREF_LANGUAGE, 'en'));
+
+                // Find tree after login so permissions allow access
+                $tree = \Tywed\Webtrees\Module\Telegram\Helpers\AppHelper::get(\Fisharebest\Webtrees\Services\TreeService::class)->find((int) $tree_id);
 
                 // Changes within last 1 day
                 $changes = $this->telegramService->getRecentChanges($tree, 1);

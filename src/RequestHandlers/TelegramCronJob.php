@@ -94,18 +94,20 @@ class TelegramCronJob implements RequestHandlerInterface
                 }
 
                 $user = AppHelper::get(\Fisharebest\Webtrees\Services\UserService::class)->find((int)$user_id);
-                $tree = AppHelper::get(\Fisharebest\Webtrees\Services\TreeService::class)->find((int)$tree_id);
 
-                if (!$user || !$tree) {
+                if (!$user) {
                     $results[$configId] = [
                         'success' => false,
-                        'message' => "Configuration \"{$configName}\": User or Tree not found.",
+                        'message' => "Configuration \"{$configName}\": User not found.",
                     ];
                     continue;
                 }
 
                 Auth::login($user);
                 I18N::init($user->getPreference(User::PREF_LANGUAGE, 'en'));
+
+                // Find tree after login so permissions allow access
+                $tree = AppHelper::get(\Fisharebest\Webtrees\Services\TreeService::class)->find((int)$tree_id);
 
                 $events = $config['events'] ?? CustomOnThisDayModule::getDefaultEvents();
                 $event_array = is_array($events) ? $events : (is_string($events) ? explode(',', $events) : []);
