@@ -100,6 +100,42 @@ class TelegramService
     }
 
     /**
+     * Prepare execution context for cron jobs: finds user and tree,
+     * performs Auth::login() and initializes I18N.
+     *
+     * If the user is not found, calls the provided callback to set
+     * an appropriate error message and returns ['user' => null, 'tree' => null].
+     * Responsibility for calling Auth::logout() remains with the caller.
+     *
+     * @param array         $config
+     * @param string        $configName
+     * @param callable      $onUserNotFound function(string $message): void
+     *
+     * @return array{user: ?User, tree: ?Tree}
+     */
+    public function prepareCronContext(array $config, string $configName, callable $onUserNotFound): array
+    {
+        $userId = $config['user_id'] ?? '';
+        $treeId = $config['tree_id'] ?? '';
+
+        $user = AppHelper::get(CoreUserService::class)->find((int) $userId);
+
+        if (!$user) {
+            $onUserNotFound("Configuration \"{$configName}\": User not found.");
+
+            return ['user' => null, 'tree' => null];
+        }
+
+        Auth::login($user);
+        I18N::init($user->getPreference(User::PREF_LANGUAGE, 'en'));
+
+        // Tree may not exist (same behaviour as before in cron jobs) – keep it unchanged.
+        $tree = AppHelper::get(CoreTreeService::class)->find((int) $treeId);
+
+        return ['user' => $user, 'tree' => $tree];
+    }
+
+    /**
      * Generate Telegram message from facts
      *
      * @param Collection<Fact> $factList
@@ -174,9 +210,20 @@ class TelegramService
         $message = $start_message;
         $messageLength = $start_length;
 
-        foreach ($messages as $factMessage) {
-            $message .= $factMessage;
-            $messageLength += mb_strlen($factMessage);
+        // Determine event type order based on configuration settings (same order as in the admin UI)
+        $events = $config['events'] ?? CustomOnThisDayModule::getDefaultEvents();
+        $eventOrder = is_array($events)
+            ? $events
+            : (is_string($events) ? explode(',', $events) : []);
+
+        // First, append blocks in the order defined in the configuration
+        foreach ($eventOrder as $eventType) {
+            $eventType = trim((string) $eventType);
+            if ($eventType !== '' && isset($messages[$eventType])) {
+                $message .= $messages[$eventType];
+                $messageLength += mb_strlen($messages[$eventType]);
+                unset($messages[$eventType]); // avoid duplication below
+            }
         }
 
         $message .= $end_message;

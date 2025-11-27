@@ -13,7 +13,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Tywed\Webtrees\Module\Telegram\Services\TelegramService;
 use Tywed\Webtrees\Module\Telegram\Telegram;
-use Tywed\Webtrees\Module\Telegram\Helpers\AppHelper;
 use Tywed\Webtrees\Module\Telegram\CustomOnThisDayModule;
 use Tywed\Webtrees\Module\Telegram\Services\TelegramConfigService;
 
@@ -86,28 +85,31 @@ class TelegramCronJob implements RequestHandlerInterface
                 // Run only once per day: prefer dedicated JD field, fallback to legacy check
                 $lastLaunchJd = $config['last_launch_jd'] ?? null;
                 if ($lastLaunchJd === $startJd || (($config['last_launch'] ?? null) === $startJd)) {
-                    $results[$configId] = [
+                     $results[$configId] = [
                         'success' => false,
                         'message' => "Configuration \"{$configName}\": Already launched today.",
-                    ];
+                     ];
+                     continue;
+                }
+
+                // Prepare context (user, language, tree) via service
+                $context = $this->telegramService->prepareCronContext(
+                    $config,
+                    $configName,
+                    function (string $message) use (&$results, $configId): void {
+                        $results[$configId] = [
+                            'success' => false,
+                            'message' => $message,
+                        ];
+                    }
+                );
+
+                if ($context['user'] === null) {
+                    // Message already set inside callback, just skip to the next configuration
                     continue;
                 }
 
-                $user = AppHelper::get(\Fisharebest\Webtrees\Services\UserService::class)->find((int)$user_id);
-
-                if (!$user) {
-                    $results[$configId] = [
-                        'success' => false,
-                        'message' => "Configuration \"{$configName}\": User not found.",
-                    ];
-                    continue;
-                }
-
-                Auth::login($user);
-                I18N::init($user->getPreference(User::PREF_LANGUAGE, 'en'));
-
-                // Find tree after login so permissions allow access
-                $tree = AppHelper::get(\Fisharebest\Webtrees\Services\TreeService::class)->find((int)$tree_id);
+                $tree = $context['tree'];
 
                 $events = $config['events'] ?? CustomOnThisDayModule::getDefaultEvents();
                 $event_array = is_array($events) ? $events : (is_string($events) ? explode(',', $events) : []);

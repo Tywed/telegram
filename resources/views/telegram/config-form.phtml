@@ -136,7 +136,25 @@ $isEdit = $config !== null;
                 </h6>
                 </p>
                 <div class="mb-3">
-                    <?php echo view('components/select', ['name' => 'events[]', 'id' => 'events', 'selected' => $config['events'] ?? $defaultEvents, 'options' => $eventLabels, 'class' => 'tom-select', 'multiple' => true]) ?>
+                    <?php
+                        $selectedEvents = $config['events'] ?? $defaultEvents;
+                        if (!is_array($selectedEvents)) {
+                            $selectedEvents = (string) $selectedEvents !== '' ? explode(',', (string) $selectedEvents) : [];
+                        }
+
+                        $orderedEventLabels = [];
+                        foreach ($selectedEvents as $eventKey) {
+                            if (isset($eventLabels[$eventKey])) {
+                                $orderedEventLabels[$eventKey] = $eventLabels[$eventKey];
+                            }
+                        }
+                        foreach ($eventLabels as $eventKey => $label) {
+                            if (!isset($orderedEventLabels[$eventKey])) {
+                                $orderedEventLabels[$eventKey] = $label;
+                            }
+                        }
+                    ?>
+                    <?php echo view('components/select', ['name' => 'events[]', 'id' => 'events', 'selected' => $selectedEvents, 'options' => $orderedEventLabels, 'class' => 'tom-select', 'multiple' => true]) ?>
                     <div class="form-text" id="event-description">
                         <?php echo I18N::translate('Select the events to send messages.') ?>
                     </div>

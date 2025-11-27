@@ -70,8 +70,6 @@ class TelegramChangesCronJob implements RequestHandlerInterface
                 }
                 
                 // Daily guard for changes
-                
-                /*
                 $lastChangesLaunchJd = $config['last_changes_launch_jd'] ?? null;
                 if ($lastChangesLaunchJd === $startJd) {
                     $results[$configId] = [
@@ -80,23 +78,24 @@ class TelegramChangesCronJob implements RequestHandlerInterface
                     ];
                     continue;
                 }
-                */
                 
-                $user = \Tywed\Webtrees\Module\Telegram\Helpers\AppHelper::get(\Fisharebest\Webtrees\Services\UserService::class)->find((int) $user_id);
+                // Prepare context (user, language, tree) via service
+                $context = $this->telegramService->prepareCronContext(
+                    $config,
+                    $configName,
+                    function (string $message) use (&$results, $configId): void {
+                        $results[$configId] = [
+                            'success' => false,
+                            'message' => $message,
+                        ];
+                    }
+                );
 
-                if (!$user) {
-                    $results[$configId] = [
-                        'success' => false,
-                        'message' => "Configuration \"{$configName}\": User not found.",
-                    ];
+                if ($context['user'] === null) {
                     continue;
                 }
 
-                Auth::login($user);
-                I18N::init($user->getPreference(User::PREF_LANGUAGE, 'en'));
-
-                // Find tree after login so permissions allow access
-                $tree = \Tywed\Webtrees\Module\Telegram\Helpers\AppHelper::get(\Fisharebest\Webtrees\Services\TreeService::class)->find((int) $tree_id);
+                $tree = $context['tree'];
 
                 // Changes within last 1 day
                 $changes = $this->telegramService->getRecentChanges($tree, 1);

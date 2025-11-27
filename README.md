@@ -2,7 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 ![webtrees major version](https://img.shields.io/badge/webtrees-v2.2.x-green)
-![Latest Release](https://img.shields.io/badge/release-v0.2.0-blue)
+![Latest Release](https://img.shields.io/badge/release-v0.2.1-blue)
 
 This [webtrees](https://www.webtrees.net/) custom module sends Telegram notifications about significant family events, such as birthdays and anniversaries, based on the data from your webtrees installation.
 
