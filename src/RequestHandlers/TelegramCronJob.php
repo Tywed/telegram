@@ -113,6 +113,10 @@ class TelegramCronJob implements RequestHandlerInterface
 
                 $events = $config['events'] ?? CustomOnThisDayModule::getDefaultEvents();
                 $event_array = is_array($events) ? $events : (is_string($events) ? explode(',', $events) : []);
+                
+                // Normalize event types: trim whitespace and filter empty values
+                $event_array = array_filter(array_map('trim', $event_array), fn($e) => $e !== '');
+                
                 $filter = $config['filter'] ?? true;
 
                 $factList = $this->telegramService->getTodayFacts($event_array, $startJd, $startJd, $tree, $filter);

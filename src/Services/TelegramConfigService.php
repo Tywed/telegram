@@ -71,7 +71,7 @@ class TelegramConfigService
                     'user_id' => $oldUserId,
                     'tree_id' => $oldTreeId,
                     'filter' => (bool)$oldFilter,
-                    'events' => $oldEvents === '' ? [] : explode(',', $oldEvents),
+                    'events' => $oldEvents === '' ? [] : array_filter(array_map('trim', explode(',', $oldEvents)), fn($e) => $e !== ''),
                     'location_display' => (int)$oldLocationDisplay,
                     'date_display' => (bool)$oldDateDisplay,
                     'start_message' => $oldStartMessage,

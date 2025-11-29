@@ -164,47 +164,52 @@ class TelegramService
         $messages = [];
 
         foreach ($factList as $fact) {
-            $factType = explode(":", $fact->tag())[1] ?? $fact->tag();
+            // Safely extract event type from fact tag (e.g., 'BIRT' from 'INDI:BIRT')
+            $tagParts = explode(":", $fact->tag(), 2);
+            $factType = trim($tagParts[1] ?? $tagParts[0] ?? '');
 
-            if (isset($types[$factType])) {
-                if (!isset($messages[$factType])) {
-                    $messages[$factType] = "🔸 <b>{$types[$factType]}</b>:\n";
-                }
-
-                $record = $fact->record();
-                $fullName = strip_tags($record->fullName());
-                $link = $record->url();
-
-                $date = strip_tags($fact->date()->display($record->tree(), null, true));
-
-                $age = (PHP_INT_SIZE >= 8 || $fact->date()->gregorianYear() > 1901)
-                    ? '(' . Registry::timestampFactory()->now()->subtractYears($fact->anniv)->diffForHumans() . ')'
-                    : '(' . I18N::plural('%s year', '%s years', $fact->anniv, I18N::number($fact->anniv)) . ')';
-
-                $factText = "<a href=\"$link\">$fullName</a>";
-
-                if ($date && $date_display) {
-                    $factText .= " — <b>$date</b>";
-
-                    if ($fact->date()->gregorianYear() > 0) {
-                        $factText .= " <b>$age</b>";
-                    }
-                }
-
-                if ($location_display !== 0 && $fact->place()->gedcomName() !== '') {
-                    if ($location_display == 1) {
-                        $placeName = strip_tags($fact->place()->shortName());
-                    } else {
-                        $placeName = strip_tags($fact->place()->fullName());
-                    }
-
-                    $placeUrl = $fact->place()->url();
-                    $factText .= " — <a href=\"$placeUrl\">$placeName</a>";
-                }
-
-                $factText .= ".\n";
-                $messages[$factType] .= $factText;
+            // Skip if factType is empty or not in allowed types
+            if ($factType === '' || !isset($types[$factType])) {
+                continue;
             }
+            
+            if (!isset($messages[$factType])) {
+                $messages[$factType] = "🔸 <b>{$types[$factType]}</b>:\n";
+            }
+
+            $record = $fact->record();
+            $fullName = strip_tags($record->fullName());
+            $link = $record->url();
+
+            $date = strip_tags($fact->date()->display($record->tree(), null, true));
+
+            $age = (PHP_INT_SIZE >= 8 || $fact->date()->gregorianYear() > 1901)
+                ? '(' . Registry::timestampFactory()->now()->subtractYears($fact->anniv)->diffForHumans() . ')'
+                : '(' . I18N::plural('%s year', '%s years', $fact->anniv, I18N::number($fact->anniv)) . ')';
+
+            $factText = "<a href=\"$link\">$fullName</a>";
+
+            if ($date && $date_display) {
+                $factText .= " — <b>$date</b>";
+
+                if ($fact->date()->gregorianYear() > 0) {
+                    $factText .= " <b>$age</b>";
+                }
+            }
+
+            if ($location_display !== 0 && $fact->place()->gedcomName() !== '') {
+                if ($location_display == 1) {
+                    $placeName = strip_tags($fact->place()->shortName());
+                } else {
+                    $placeName = strip_tags($fact->place()->fullName());
+                }
+
+                $placeUrl = $fact->place()->url();
+                $factText .= " — <a href=\"$placeUrl\">$placeName</a>";
+            }
+
+            $factText .= ".\n";
+            $messages[$factType] .= $factText;
         }
 
         $message = $start_message;
@@ -215,6 +220,9 @@ class TelegramService
         $eventOrder = is_array($events)
             ? $events
             : (is_string($events) ? explode(',', $events) : []);
+        
+        // Normalize event types: trim whitespace and filter empty values
+        $eventOrder = array_filter(array_map('trim', $eventOrder), fn($e) => $e !== '');
 
         // First, append blocks in the order defined in the configuration
         foreach ($eventOrder as $eventType) {
