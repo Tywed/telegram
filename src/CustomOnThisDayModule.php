@@ -37,4 +37,4 @@ class CustomOnThisDayModule
 
         return $all_events;
     }
-} 
+}

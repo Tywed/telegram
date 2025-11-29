@@ -172,7 +172,7 @@ class TelegramService
             if ($factType === '' || !isset($types[$factType])) {
                 continue;
             }
-            
+
             if (!isset($messages[$factType])) {
                 $messages[$factType] = "🔸 <b>{$types[$factType]}</b>:\n";
             }
@@ -220,7 +220,7 @@ class TelegramService
         $eventOrder = is_array($events)
             ? $events
             : (is_string($events) ? explode(',', $events) : []);
-        
+
         // Normalize event types: trim whitespace and filter empty values
         $eventOrder = array_filter(array_map('trim', $eventOrder), fn($e) => $e !== '');
 
@@ -399,4 +399,4 @@ class TelegramService
             throw $e;
         }
     }
-} 
+}

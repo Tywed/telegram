@@ -32,7 +32,7 @@ use Fisharebest\Webtrees\Validator;
 
 /**
  * Telegram Module
- * 
+ *
  * A module that sends Telegram notifications about significant family events
  */
 class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGlobalInterface, ModuleConfigInterface, MiddlewareInterface
@@ -61,7 +61,7 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
     {
         $userService = AppHelper::get(UserService::class);
         $treeService = AppHelper::get(TreeService::class);
-        
+
         $this->telegramService = new TelegramService($this, $userService, $treeService);
         $this->telegramConfigService = new TelegramConfigService($this, $userService, $treeService);
         $this->telegramController = new TelegramController($this->telegramService, $this, $this->telegramConfigService);
@@ -143,7 +143,7 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
 
     /**
      * HTTP request processing
-     * 
+     *
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
      * @return ResponseInterface
@@ -155,7 +155,7 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
 
     /**
      * Path to module resources
-     * 
+     *
      * @return string
      */
     public function resourcesFolder(): string
@@ -165,7 +165,7 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
 
     /**
      * Load translations
-     * 
+     *
      * @param string $language
      * @return array
      */
@@ -187,7 +187,7 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
     public function getAdminAction(ServerRequestInterface $request): ResponseInterface
     {
         $this->layout = 'layouts/administration';
-        
+
         $params = $this->telegramController->configsIndex($request);
         return $this->viewResponse($this->name() . '::configs-list', $params);
     }
@@ -201,7 +201,7 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
     public function postAdminAction(ServerRequestInterface $request): ResponseInterface
     {
         $action = Validator::parsedBody($request)->string('action', '');
-        
+
         switch ($action) {
             case 'delete':
                 $id = Validator::parsedBody($request)->string('id', '');
@@ -227,7 +227,7 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
     public function getConfigAddAction(ServerRequestInterface $request): ResponseInterface
     {
         $this->layout = 'layouts/administration';
-        
+
         $params = $this->telegramController->configAdd($request);
         return $this->viewResponse($this->name() . '::config-form', $params);
     }
@@ -252,22 +252,22 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
     public function getConfigEditAction(ServerRequestInterface $request, string $id = ''): ResponseInterface
     {
         $this->layout = 'layouts/administration';
-        
+
         // If ID not provided as parameter, try to get from query parameters (for backward compatibility)
         if (empty($id)) {
             $id = Validator::queryParams($request)->string('id', '');
         }
-              
+
         if (empty($id)) {
             FlashMessages::addMessage(I18N::translate('Configuration ID not provided'), 'danger');
             return redirect(route('module', ['module' => $this->name(), 'action' => 'Admin']));
         }
-        
+
         $params = $this->telegramController->configEdit($request, $id);
         if (empty($params)) {
             return redirect(route('module', ['module' => $this->name(), 'action' => 'Admin']));
         }
-        
+
         return $this->viewResponse($this->name() . '::config-form', $params);
     }
 
@@ -283,4 +283,4 @@ class Telegram extends AbstractModule implements ModuleCustomInterface, ModuleGl
         return $this->telegramController->configUpdate($request, $id);
     }
 
-} 
+}

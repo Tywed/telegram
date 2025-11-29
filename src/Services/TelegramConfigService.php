@@ -33,7 +33,7 @@ class TelegramConfigService
     public function getAllConfigs(): array
     {
         $configs = json_decode($this->module->getPreference(Telegram::CUSTOM_MODULE_CONFIGS, '[]'), true);
-        
+
         // Ensure configs is always an array
         if (!is_array($configs)) {
             $configs = [];
@@ -41,11 +41,11 @@ class TelegramConfigService
 
         // Check if migration has already been done
         $migrationDone = $this->module->getPreference('telegram_migration_done', '0') === '1';
-        
+
         if (!$migrationDone) {
             // Migrate existing configs to new structure if needed
             $configs = $this->migrateConfigs($configs);
-            
+
             // Mark migration as done
             $this->module->setPreference('telegram_migration_done', '1');
         }
@@ -112,12 +112,12 @@ class TelegramConfigService
     private function migrateConfigs(array $configs): array
     {
         $migrated = false;
-        
+
         foreach ($configs as $key => $config) {
             // Check if config needs migration (has old field names)
             if (isset($config['telegram_token']) || isset($config['telegram_id']) || isset($config['user']) || isset($config['tree'])) {
                 $newConfig = $config;
-                
+
                 // Migrate field names
                 if (isset($config['telegram_token'])) {
                     $newConfig['bot_token'] = $config['telegram_token'];
@@ -135,7 +135,7 @@ class TelegramConfigService
                     $newConfig['tree_id'] = $config['tree'];
                     unset($newConfig['tree']);
                 }
-                
+
                 // Add missing fields
                 if (!isset($newConfig['enabled'])) {
                     $newConfig['enabled'] = true;
@@ -167,17 +167,17 @@ class TelegramConfigService
                 if (!isset($newConfig['last_error_date'])) {
                     $newConfig['last_error_date'] = null;
                 }
-                
+
                 $configs[$key] = $newConfig;
                 $migrated = true;
             }
         }
-        
+
         // Save migrated configs if any changes were made
         if ($migrated) {
             $this->saveAllConfigs($configs);
         }
-        
+
         return $configs;
     }
 
@@ -200,7 +200,7 @@ class TelegramConfigService
     public function getConfigById(string $id): ?array
     {
         $configs = $this->getAllConfigs();
-        
+
         foreach ($configs as $config) {
             if ($config['id'] === $id) {
                 return $config;
@@ -236,7 +236,7 @@ class TelegramConfigService
             if (!isset($configData['id'])) {
                 $configData['id'] = uniqid();
             }
-            
+
             // Check if ID already exists
             foreach ($configs as $config) {
                 if ($config['id'] === $configData['id']) {
@@ -245,7 +245,7 @@ class TelegramConfigService
                     break;
                 }
             }
-            
+
             $configs[] = $configData;
             $this->saveAllConfigs($configs);
             return $configData;

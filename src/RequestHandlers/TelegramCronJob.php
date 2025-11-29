@@ -113,10 +113,10 @@ class TelegramCronJob implements RequestHandlerInterface
 
                 $events = $config['events'] ?? CustomOnThisDayModule::getDefaultEvents();
                 $event_array = is_array($events) ? $events : (is_string($events) ? explode(',', $events) : []);
-                
+
                 // Normalize event types: trim whitespace and filter empty values
                 $event_array = array_filter(array_map('trim', $event_array), fn($e) => $e !== '');
-                
+
                 $filter = $config['filter'] ?? true;
 
                 $factList = $this->telegramService->getTodayFacts($event_array, $startJd, $startJd, $tree, $filter);
@@ -140,7 +140,7 @@ class TelegramCronJob implements RequestHandlerInterface
                 }
 
                 Auth::logout();
-                
+
                 // Update last launch markers for this configuration (successful run)
                 $config['last_launch'] = $currentTimestamp; // keep timestamp for UI display
                 $config['last_launch_jd'] = $startJd;       // use JD for daily guard
@@ -149,20 +149,20 @@ class TelegramCronJob implements RequestHandlerInterface
 
             } catch (\Exception $e) {
                 Auth::logout(); // Ensure logout even on error
-                
+
                 // Check if this is a Telegram API error (not a general error)
-                $isTelegramError = strpos($e->getMessage(), 'Telegram') !== false || 
+                $isTelegramError = strpos($e->getMessage(), 'Telegram') !== false ||
                                  strpos($e->getMessage(), 'bot') !== false ||
                                  strpos($e->getMessage(), 'chat') !== false ||
                                  strpos($e->getMessage(), 'token') !== false;
-                
+
                 if ($isTelegramError) {
                     // Update last_error for Telegram-related errors
                     $config['last_error'] = $e->getMessage();
                     $config['last_error_date'] = $currentTimestamp;
                     $this->telegramConfigService->saveConfig($config, $configId);
                 }
-                
+
                 $results[$configId] = [
                     'success' => false,
                     'message' => "Configuration \"{$configName}\": Error - " . $e->getMessage(),
@@ -175,4 +175,4 @@ class TelegramCronJob implements RequestHandlerInterface
             'results' => $results,
         ]);
     }
-} 
+}
