@@ -20,7 +20,7 @@ use Tywed\Webtrees\Module\Telegram\Telegram;
 class TelegramController
 {
     use ViewResponseTrait;
-    
+
     private TelegramService $telegramService;
     private Telegram $module;
     private TelegramConfigService $telegramConfigService;
@@ -49,7 +49,7 @@ class TelegramController
         $configs = $this->telegramConfigService->getAllConfigs();
         $users = $this->telegramConfigService->getAvailableUsers();
         $trees = $this->telegramConfigService->getAvailableTrees();
-        
+
         return [
             'configs' => $configs,
             'users' => $users,
@@ -72,7 +72,7 @@ class TelegramController
         $events = \Tywed\Webtrees\Module\Telegram\CustomOnThisDayModule::getAllEvents();
         $defaultEvents = \Tywed\Webtrees\Module\Telegram\CustomOnThisDayModule::getDefaultEvents();
         $eventLabels = \Tywed\Webtrees\Module\Telegram\CustomOnThisDayModule::getEventLabels();
-        
+
         return [
             'config' => null,
             'users' => $users,
@@ -101,13 +101,13 @@ class TelegramController
             FlashMessages::addMessage(I18N::translate('Configuration not found'), 'danger');
             return [];
         }
-        
+
         $users = $this->telegramConfigService->getAvailableUsers();
         $trees = $this->telegramConfigService->getAvailableTrees();
         $events = \Tywed\Webtrees\Module\Telegram\CustomOnThisDayModule::getAllEvents();
         $defaultEvents = \Tywed\Webtrees\Module\Telegram\CustomOnThisDayModule::getDefaultEvents();
         $eventLabels = \Tywed\Webtrees\Module\Telegram\CustomOnThisDayModule::getEventLabels();
-        
+
         return [
             'config' => $config,
             'users' => $users,
@@ -131,19 +131,19 @@ class TelegramController
     public function configStore(ServerRequestInterface $request): ResponseInterface
     {
         $data = Validator::parsedBody($request);
-        
+
         $name = $data->string('name', '');
         $bot_token = $data->string('bot_token', '');
         $chat_id = $data->string('chat_id', '');
         $user_id = $data->string('user_id', '');
         $tree_id = $data->string('tree_id', '');
-        
+
         // Validate required fields
         if (empty($name) || empty($bot_token) || empty($chat_id) || empty($user_id) || empty($tree_id)) {
             FlashMessages::addMessage(I18N::translate('Please fill in all required fields'), 'danger');
             return redirect(route('module', ['module' => $this->module->name(), 'action' => 'ConfigAdd']));
         }
-        
+
         $config = [
             'id' => uniqid(),
             'name' => $name,
@@ -159,10 +159,10 @@ class TelegramController
             'start_message' => $data->string('start_message', ''),
             'end_message' => $data->string('end_message', ''),
         ];
-        
+
         $this->telegramConfigService->saveConfig($config);
         FlashMessages::addMessage(I18N::translate('Configuration added successfully'), 'success');
-        
+
         return redirect(route('module', ['module' => $this->module->name(), 'action' => 'Admin']));
     }
 
@@ -176,19 +176,19 @@ class TelegramController
     public function configUpdate(ServerRequestInterface $request, string $id): ResponseInterface
     {
         $data = Validator::parsedBody($request);
-        
+
         $name = $data->string('name', '');
         $bot_token = $data->string('bot_token', '');
         $chat_id = $data->string('chat_id', '');
         $user_id = $data->string('user_id', '');
         $tree_id = $data->string('tree_id', '');
-        
+
         // Validate required fields
         if (empty($name) || empty($bot_token) || empty($chat_id) || empty($user_id) || empty($tree_id)) {
             FlashMessages::addMessage(I18N::translate('Please fill in all required fields'), 'danger');
             return redirect(route('module', ['module' => $this->module->name(), 'action' => 'ConfigEdit', 'id' => $id]));
         }
-        
+
         $config = [
             'id' => $id,
             'name' => $name,
@@ -204,10 +204,10 @@ class TelegramController
             'start_message' => $data->string('start_message', ''),
             'end_message' => $data->string('end_message', ''),
         ];
-        
+
         $this->telegramConfigService->saveConfig($config, $id);
         FlashMessages::addMessage(I18N::translate('Configuration updated successfully'), 'success');
-        
+
         return redirect(route('module', ['module' => $this->module->name(), 'action' => 'Admin']));
     }
 
@@ -222,7 +222,7 @@ class TelegramController
     {
         $this->telegramConfigService->deleteConfig($id);
         FlashMessages::addMessage(I18N::translate('Configuration deleted successfully'), 'success');
-        
+
         return redirect(route('module', ['module' => $this->module->name(), 'action' => 'Admin']));
     }
 

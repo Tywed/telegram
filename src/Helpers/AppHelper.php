@@ -26,4 +26,4 @@ class AppHelper
 
         throw new Exception('Can not find container resolver');
     }
-} 
+}

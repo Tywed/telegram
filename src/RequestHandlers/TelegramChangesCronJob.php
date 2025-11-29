@@ -68,7 +68,7 @@ class TelegramChangesCronJob implements RequestHandlerInterface
                     ];
                     continue;
                 }
-                
+
                 // Daily guard for changes
                 $lastChangesLaunchJd = $config['last_changes_launch_jd'] ?? null;
                 if ($lastChangesLaunchJd === $startJd) {
@@ -78,7 +78,7 @@ class TelegramChangesCronJob implements RequestHandlerInterface
                     ];
                     continue;
                 }
-                
+
                 // Prepare context (user, language, tree) via service
                 $context = $this->telegramService->prepareCronContext(
                     $config,
@@ -140,5 +140,3 @@ class TelegramChangesCronJob implements RequestHandlerInterface
         ]);
     }
 }
-
-
